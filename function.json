@@ -1,0 +1,148 @@
+{
+  "type": "scalar.function",
+  "input_schema": {
+    "type": "object",
+    "description": "A cat photograph to evaluate for background quality. The function examines everything in the frame that is not the cat and assesses whether the surrounding environment recedes gracefully behind the subject or competes with it for the viewer's attention.",
+    "properties": {
+      "cat_photograph": {
+        "type": "image",
+        "description": "The cat photograph to evaluate. The image should contain a cat as the intended subject. The function shifts attention to everything in the frame that is not the cat — the background, surfaces, objects, lighting, and surrounding environment — and scores how well that space defers to the cat as the clear visual subject."
+      }
+    },
+    "required": [
+      "cat_photograph"
+    ]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "$jmespath": "input.cat_photograph"
+            },
+            {
+              "type": "text",
+              "text": "I took this photo of my cat. Is there anything in the background that grabs your eye before the cat does?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "No, the cat is clearly the star here. Nothing in the background comes close to competing — every element in the surrounding space stays quiet and subordinate, letting the cat stand out as the most visually prominent thing in the frame."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat stands out, but there are a couple of elements in the background that catch my eye — something bright, sharp, or visually striking that briefly pulls my attention away before it returns to the cat."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "Honestly, yes — there are things in the background that grab my attention as much as the cat, or even more. The cat has to compete with other visually prominent elements and doesn't clearly dominate the frame."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are a professional pet photographer reviewing cat photos for a client's portfolio. You have a keen eye for how the space surrounding a subject affects the viewer's experience of the photograph."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here's the next photo for review. Can you describe the overall feel of the space around the cat? Does it let the eye settle, or is there a lot to look at?"
+            },
+            {
+              "$jmespath": "input.cat_photograph"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The space around the cat is calm and uncluttered. There's nothing for the eye to wander to or inventory — the surfaces are uniform, the tones are muted, and any background detail stays soft and quiet. The viewer's gaze lands on the cat and rests there comfortably. This background feels like atmosphere, not a collection of objects."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "There's a moderate amount going on around the cat. Some objects, textures, or patterns create mild visual activity that pulls the gaze here and there before it settles back on the cat. It's not overwhelming, but the space has enough going on that the eye doesn't rest entirely still — the background is present in a way you notice."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The space around the cat is quite busy. There are many things to look at — cluttered surfaces, busy patterns, numerous small objects scattered around — creating a field of visual noise that keeps the eye restless. The cat ends up feeling like one item among many rather than the clear subject of the photograph."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "I'm choosing between several versions of this cat photo for my portfolio. Looking at the colors, lighting, and contrast across the whole frame — does everything feel like it belongs together, or does something about the tones feel off?"
+            },
+            {
+              "$jmespath": "input.cat_photograph"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The tones in this photograph are beautifully harmonious. The colors complement each other, the light falls evenly or graduates softly, and the cat sits naturally within a unified visual world. There are no jarring contrasts, clashing colors, or harsh tonal breaks — the entire frame feels cohesive and peaceful, with the cat distinct but at home in its surroundings."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "It mostly works, though there are a few spots where the tonal balance feels slightly off — maybe an uneven patch of lighting, a mildly clashing color, or a transition in brightness that draws the eye for a moment. The cat generally belongs in the scene, but the harmony across the frame isn't quite seamless."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The tones feel disjointed. There are harsh shadows, blown-out highlights, clashing colors, or abrupt contrasts that fracture the visual calm of the image. The cat either merges into the background without enough tonal separation to stand out, or is jarred against it by overly harsh contrast. The frame doesn't feel like a unified visual world."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5 + output[\"scores\"][2] * 0.0"
+      }
+    }
+  ],
+  "description": "Scores how well a cat photograph's background defers to the cat as subject. Evaluates visual subordination (no element rivals the cat), attentional cohesion (the background doesn't scatter the gaze), and tonal harmony (colors, light, and contrast feel unified). Returns 0–1, where 1 means the background stays perfectly quiet."
+}
